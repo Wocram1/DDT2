@@ -1,12 +1,20 @@
 import { api } from "./api.js";
 
 /* ======== UI HELPERS ======== */
-function showMainMenu() {
+function showLogin() {
+  document.getElementById("login").style.display = "block";
+  document.querySelector(".menu").style.display = "none";
   document.getElementById("scoring").style.display = "none";
+}
+
+function showMainMenu() {
+  document.getElementById("login").style.display = "none";
   document.querySelector(".menu").style.display = "flex";
+  document.getElementById("scoring").style.display = "none";
 }
 
 function showScoringUI() {
+  document.getElementById("login").style.display = "none";
   document.querySelector(".menu").style.display = "none";
   document.getElementById("scoring").style.display = "block";
 }
@@ -17,6 +25,21 @@ window.login = async function () {
   const password = document.getElementById("password").value;
 
   const res = await api("login", { username, password });
+
+  if (res.success) {
+    sessionStorage.setItem("token", res.token);
+    showMainMenu();
+  } else {
+    alert(res.error);
+  }
+};
+
+window.register = async function () {
+  const username = document.getElementById("reg_username").value;
+  const password = document.getElementById("reg_password").value;
+  const inviteCode = document.getElementById("invite").value;
+
+  const res = await api("register", { username, password, inviteCode });
 
   if (res.success) {
     sessionStorage.setItem("token", res.token);
@@ -70,10 +93,23 @@ window.registerHit = async function (value) {
 const app = document.getElementById("app");
 
 const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
-const numberButtons = numbers.map(n => `<button data-n="${n}">${n}</button>`).join("");
+const numberButtons = numbers.map(n => `<button onclick="registerHit(${n})">${n}</button>`).join("");
 
 app.innerHTML = `
-  <div class="menu">
+  <div id="login">
+    <h2>Login</h2>
+    <input id="username" placeholder="Name" />
+    <input id="password" placeholder="Password" type="password" />
+    <button onclick="login()">Login</button>
+
+    <h2>Register</h2>
+    <input id="reg_username" placeholder="Name" />
+    <input id="reg_password" placeholder="Password" type="password" />
+    <input id="invite" placeholder="Invite Code" />
+    <button onclick="register()">Register</button>
+  </div>
+
+  <div class="menu" style="display:none;">
     <button class="glass">Games</button>
     <button class="glass">Stats</button>
     <button class="glass" onclick="startQuickplay()">Quickplay</button>
@@ -85,9 +121,9 @@ app.innerHTML = `
 
   <div id="scoring" style="display:none;">
     <div class="mode">
-      <button data-m="1" onclick="setMultiplier(1)">S-1</button>
-      <button data-m="2" onclick="setMultiplier(2)">D-1</button>
-      <button data-m="3" onclick="setMultiplier(3)">T-1</button>
+      <button onclick="setMultiplier(1)">S-1</button>
+      <button onclick="setMultiplier(2)">D-1</button>
+      <button onclick="setMultiplier(3)">T-1</button>
     </div>
 
     <div class="numbers">
@@ -95,9 +131,14 @@ app.innerHTML = `
     </div>
 
     <div class="special">
-      <button data-bull="25" onclick="registerHit(25)">BULL</button>
-      <button data-bull="50" onclick="registerHit(50)">BULL</button>
-      <button data-miss onclick="registerHit(0)">MISS</button>
+      <button onclick="registerHit(25)">BULL</button>
+      <button onclick="registerHit(50)">BULL</button>
+      <button onclick="registerHit(0)">MISS</button>
     </div>
   </div>
 `;
+
+/* ======== INIT ======== */
+const token = sessionStorage.getItem("token");
+if (token) showMainMenu();
+else showLogin();
