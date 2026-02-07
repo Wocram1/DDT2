@@ -1,43 +1,56 @@
 import { api } from "./api.js";
 
+/* ======== UI HELPERS ======== */
+function showMainMenu() {
+  document.getElementById("scoring").style.display = "none";
+  document.querySelector(".menu").style.display = "flex";
+}
+
+function showScoringUI() {
+  document.querySelector(".menu").style.display = "none";
+  document.getElementById("scoring").style.display = "block";
+}
+
+/* ======== LOGIN ======== */
 window.login = async function () {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  const res = await api("login", {
-    username,
-    password
-  });
+  const res = await api("login", { username, password });
 
   if (res.success) {
-    // ✅ HIER wird das Token gespeichert
     sessionStorage.setItem("token", res.token);
-
     showMainMenu();
   } else {
     alert(res.error);
   }
 };
-window.addEventListener("load", () => {
-  const token = sessionStorage.getItem("token");
 
-  if (token) {
-    showMainMenu();
-  }
-});
-const token = sessionStorage.getItem("token");
-
-await api("startGame", { token });
-/* ===== SCORING STATE ===== */
-let currentMultiplier = 1; // 1 = Single, 2 = Double, 3 = Triple
-let dartNr = 1;            // 1, 2 oder 3
+/* ======== QUICKPLAY ======== */
+let currentMultiplier = 1;
+let dartNr = 1;
 let currentGameId = null;
+
 window.setMultiplier = function (m) {
   currentMultiplier = m;
 };
+
+window.startQuickplay = async function () {
+  const token = sessionStorage.getItem("token");
+  const res = await api("startGame", { token });
+
+  if (res.success) {
+    currentGameId = res.gameId;
+    dartNr = 1;
+    currentMultiplier = 1;
+    showScoringUI();
+  } else {
+    alert(res.error);
+  }
+};
+
 window.registerHit = async function (value) {
   const token = sessionStorage.getItem("token");
-
   const points = value * currentMultiplier;
 
   await api("throw", {
@@ -50,24 +63,14 @@ window.registerHit = async function (value) {
   });
 
   dartNr++;
-
-  if (dartNr > 3) {
-    dartNr = 1;
-    // hier später: Spielerwechsel / nächste Runde
-  }
+  if (dartNr > 3) dartNr = 1;
 };
-window.startQuickplay = async function () {
-  const token = sessionStorage.getItem("token");
 
-  const res = await api("startGame", { token });
-  if (res.success) {
-    currentGameId = res.gameId;
-    dartNr = 1;
-    currentMultiplier = 1;
-    showScoringUI();
-  }
-};
+/* ======== UI RENDER ======== */
 const app = document.getElementById("app");
+
+const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
+const numberButtons = numbers.map(n => `<button data-n="${n}">${n}</button>`).join("");
 
 app.innerHTML = `
   <div class="menu">
@@ -80,25 +83,21 @@ app.innerHTML = `
     <div class="xp-fill" style="width: 40%"></div>
   </div>
 
-  <div id="scoring">
+  <div id="scoring" style="display:none;">
     <div class="mode">
-      <button data-m="1">S-1</button>
-      <button data-m="2">D-1</button>
-      <button data-m="3">T-1</button>
+      <button data-m="1" onclick="setMultiplier(1)">S-1</button>
+      <button data-m="2" onclick="setMultiplier(2)">D-1</button>
+      <button data-m="3" onclick="setMultiplier(3)">T-1</button>
     </div>
+
     <div class="numbers">
-      <button data-n="1">1</button>
-      ...
-      <button data-n="20">20</button>
+      ${numberButtons}
     </div>
+
     <div class="special">
-      <button data-bull="25">BULL</button>
-      <button data-bull="50">BULL</button>
-      <button data-miss>MISS</button>
+      <button data-bull="25" onclick="registerHit(25)">BULL</button>
+      <button data-bull="50" onclick="registerHit(50)">BULL</button>
+      <button data-miss onclick="registerHit(0)">MISS</button>
     </div>
   </div>
-
-  <button onclick="setMultiplier(1)">S</button>
-  <button onclick="setMultiplier(2)">D</button>
-  <button onclick="setMultiplier(3)">T</button>
 `;
