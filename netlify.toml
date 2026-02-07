@@ -3,7 +3,7 @@
   command = ""
 
 [[redirects]]
-  from = "/api"
+  from = "/api*"
   to = "https://script.google.com/macros/s/AKfycbxudz2gy8i6tEO7VX8qN7DsV-pLoRojVnBJuolcvFTFfEfvwsU2O57PM-DghEhqh4ad/exec"
   status = 200
   force = true
