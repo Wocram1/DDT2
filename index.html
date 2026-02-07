@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dart Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- MAIN SCRIPT -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
+
+<div class="menu">
+  <button class="glass">Games</button>
+  <button class="glass">Stats</button>
+  <button class="glass" onclick="startQuickplay()">Quickplay</button>
+</div>
+<div class="xp-bar">
+  <div class="xp-fill" style="width: 40%"></div>
+</div>
+<div id="scoring">
+  <div class="mode">
+    <button data-m="1">S-1</button>
+    <button data-m="2">D-1</button>
+    <button data-m="3">T-1</button>
+  </div>
+
+  <div class="numbers">
+    <button data-n="1">1</button>
+    ...
+    <button data-n="20">20</button>
+  </div>
+
+  <div class="special">
+    <button data-bull="25">BULL</button>
+    <button data-bull="50">BULL</button>
+    <button data-miss>MISS</button>
+  </div>
+</div>
+<button onclick="setMultiplier(1)">S</button>
+<button onclick="setMultiplier(2)">D</button>
+<button onclick="setMultiplier(3)">T</button>
